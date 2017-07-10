@@ -92,6 +92,21 @@ namespace Parquet.Data
          }
       }
 
+      private void Validate(Row row)
+      {
+         if (row == null)
+            throw new ArgumentNullException(nameof(row));
+
+         if (row.Length != _schema.Length)
+            throw new ArgumentException($"the row has {row.Length} values but schema expects {_schema.Length}", nameof(row));
+
+         for(int i = 0; i < row.Length; i++)
+         {
+            if (row[i].GetType() != _schema.Elements[i].ElementType)
+               throw new ArgumentException($"column '{_schema.Elements[i].Name}' expects '{_schema.Elements[i].ElementType}' but {row[i].GetType()} passed");
+         }
+      }
+
       #region [ IList members ]
 
       /// <summary>
@@ -125,7 +140,7 @@ namespace Parquet.Data
       /// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
       public void Add(Row item)
       {
-         //todo: validate schema
+         Validate(item);
 
          _rows.Add(item);
       }
@@ -190,7 +205,7 @@ namespace Parquet.Data
       /// <param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList`1" />.</param>
       public void Insert(int index, Row item)
       {
-         //todo: validate schema
+         Validate(item);
 
          _rows.Insert(index, item);
       }

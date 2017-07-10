@@ -36,6 +36,11 @@ namespace Parquet.Data
       public IList<SchemaElement> Elements => _elements;
 
       /// <summary>
+      /// Gets the number of elements in the schema
+      /// </summary>
+      public int Length => _elements.Count;
+
+      /// <summary>
       /// Gets the column names as string array
       /// </summary>
       public string[] ColumnNames => _elements.Select(e => e.Name).ToArray();
