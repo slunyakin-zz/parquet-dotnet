@@ -19,7 +19,7 @@ namespace parq
 
       protected override void OnConfigure(IConfigConfiguration configuration)
       {
-         configuration.UseCommandLineArgs();
+         configuration.UseCommandLineArgs(new Dictionary<int, Option>{ { 0, Mode} });
       }
    }
 }
