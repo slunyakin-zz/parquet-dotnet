@@ -45,6 +45,18 @@ namespace Parquet.Data
       /// </summary>
       public string[] ColumnNames => _elements.Select(e => e.Name).ToArray();
 
+      /// <summary>
+      /// Gets the column index by schema element
+      /// </summary>
+      /// <returns>Element index or -1 if not found</returns>
+      public int GetElementIndex(SchemaElement schema)
+      {
+         for (int i = 0; i < _elements.Count; i++)
+            if (schema.Equals(_elements[i])) return i;
+
+         return -1;
+      }
+
       internal int GetMaxDefinitionLevel(Thrift.ColumnChunk cc)
       {
          int max = 0;

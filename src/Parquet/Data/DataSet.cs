@@ -137,12 +137,12 @@ namespace Parquet.Data
       /// <summary>
       /// Adds an item to the <see cref="T:System.Collections.Generic.ICollection`1" />.
       /// </summary>
-      /// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
-      public void Add(Row item)
+      /// <param name="row">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
+      public void Add(Row row)
       {
-         Validate(item);
+         Validate(row);
 
-         _rows.Add(item);
+         _rows.Add(row);
       }
 
       /// <summary>
@@ -201,13 +201,13 @@ namespace Parquet.Data
       /// <summary>
       /// Inserts an item to the <see cref="T:System.Collections.Generic.IList`1" /> at the specified index.
       /// </summary>
-      /// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
-      /// <param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList`1" />.</param>
-      public void Insert(int index, Row item)
+      /// <param name="index">The zero-based index at which <paramref name="row" /> should be inserted.</param>
+      /// <param name="row">The object to insert into the <see cref="T:System.Collections.Generic.IList`1" />.</param>
+      public void Insert(int index, Row row)
       {
-         Validate(item);
+         Validate(row);
 
-         _rows.Insert(index, item);
+         _rows.Insert(index, row);
       }
 
       /// <summary>

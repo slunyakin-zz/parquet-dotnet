@@ -14,8 +14,7 @@ namespace Parquet.Data
       /// Initializes a new instance of the <see cref="SchemaElement"/> class.
       /// </summary>
       /// <param name="name">Column name</param>
-      /// <param name="isNullable">When true, column can have null values</param>
-      public SchemaElement(string name, bool isNullable) : base(name, typeof(T), isNullable)
+      public SchemaElement(string name) : base(name, typeof(T))
       {
 
       }
@@ -32,17 +31,14 @@ namespace Parquet.Data
       /// </summary>
       /// <param name="name">Column name</param>
       /// <param name="elementType">Type of the element in this column</param>
-      /// <param name="isNullable">When true, column can have null values</param>
-      public SchemaElement(string name, Type elementType, bool isNullable)
+      public SchemaElement(string name, Type elementType)
       {
          Name = name;
          ElementType = elementType;
-         IsNullable = isNullable;
          Thrift = new PSE(name)
          {
-            Repetition_type = isNullable
-               ? Parquet.Thrift.FieldRepetitionType.OPTIONAL
-               : Parquet.Thrift.FieldRepetitionType.REQUIRED,
+            //this must be changed later or if column has nulls (on write)
+            Repetition_type = Parquet.Thrift.FieldRepetitionType.REQUIRED
          };
          TypeFactory.AdjustSchema(Thrift, elementType);
       }

@@ -72,6 +72,9 @@ namespace Parquet
       {
          _meta.AddSchema(dataSet);
 
+         var stats = new DataSetStats(dataSet);
+
+
          long totalCount = dataSet.Count;
 
          Thrift.RowGroup rg = _meta.AddRowGroup();
