@@ -12,9 +12,9 @@ namespace Parquet.Test
       public void Write_different_compressions()
       {
          var ds = new DataSet(
-            new SchemaElement<int>("id", false),
-            new SchemaElement<bool>("bool_col", false),
-            new SchemaElement<string>("string_col", false)
+            new SchemaElement<int>("id"),
+            new SchemaElement<bool>("bool_col"),
+            new SchemaElement<string>("string_col")
          );
 
          //8 values for each column
@@ -51,7 +51,7 @@ namespace Parquet.Test
       public void Write_datetimeoffset()
       {
          var ds = new DataSet(
-            new SchemaElement<DateTimeOffset>("timestamp_col", false)
+            new SchemaElement<DateTimeOffset>("timestamp_col")
          )
          {
             new DateTimeOffset(new DateTime(2017, 1, 1, 12, 13, 22)),
@@ -74,35 +74,24 @@ namespace Parquet.Test
 
       }
 
-      //[Fact]
-      public void Delete_me()
+      [Fact]
+      public void Write_and_read_nullable_integers()
       {
-         DataSet ds = ParquetReader.ReadFile("c:\\tmp\\test.parquet");
-      }
+         var ds = new DataSet(new SchemaElement<int>("id"));
 
-      //[Fact]
-      public void Write_large_gzip()
-      {
-         var ds = new DataSet(
-            new SchemaElement<string>("Postcode", false)
-            );
-
-         for(int i = 0; i < 10000; i++)
-         {
-            ds.Add("postcode #" + i);
-         }
+         ds.Add(1);
+         ds.Add(2);
+         ds.Add(3);
+         ds.Add((object)null);
+         ds.Add(4);
+         ds.Add((object)null);
+         ds.Add(5);
 
          var ms = new MemoryStream();
-         using (var writer = new ParquetWriter(ms))
-         {
-            writer.Write(ds, CompressionMethod.Gzip);
-         }
+         ParquetWriter.Write(ds, ms);
 
-#if DEBUG
-         const string path = "c:\\tmp\\firstgzip.parquet";
-         F.WriteAllBytes(path, ms.ToArray());
-#endif
-
+         ms.Position = 0;
+         DataSet ds1 = ParquetReader.Read(ms);
       }
    }
 }

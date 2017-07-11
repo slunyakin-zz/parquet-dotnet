@@ -33,6 +33,9 @@ namespace Parquet.Data
       /// <param name="elementType">Type of the element in this column</param>
       public SchemaElement(string name, Type elementType)
       {
+         if (string.IsNullOrEmpty(name))
+            throw new ArgumentException("cannot be null or empty", nameof(name));
+
          Name = name;
          ElementType = elementType;
          Thrift = new PSE(name)
@@ -64,7 +67,7 @@ namespace Parquet.Data
       /// <summary>
       /// Returns true if element can have null values
       /// </summary>
-      public bool IsNullable { get; }
+      public bool? IsNullable { get; internal set; }
 
       internal PSE Thrift { get; set; }
 

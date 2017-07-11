@@ -16,7 +16,7 @@ namespace Parquet.Test
       [Fact]
       public void Validate_type_mismatch_throws_exception()
       {
-         var ds = new DataSet(new SchemaElement<string>("s", false));
+         var ds = new DataSet(new SchemaElement<string>("s"));
 
          Assert.Throws<ArgumentException>(() => ds.Add(4));
       }
@@ -24,7 +24,7 @@ namespace Parquet.Test
       [Fact]
       public void Validate_wrongcolnumber_throws_exception()
       {
-         var ds = new DataSet(new SchemaElement<string>("s", false));
+         var ds = new DataSet(new SchemaElement<string>("s"));
 
          Assert.Throws<ArgumentException>(() => ds.Add("1", 2));
       }

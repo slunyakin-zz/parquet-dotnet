@@ -46,7 +46,7 @@ namespace Parquet.Data
       public IList GetColumn(int i)
       {
          SchemaElement schema = Schema.Elements[i];
-         IList result = TypeFactory.Create(schema.ElementType, schema.IsNullable);
+         IList result = TypeFactory.Create(schema.ElementType, schema.IsNullable.HasValue ? schema.IsNullable.Value : false);
 
          foreach(Row row in _rows)
          {
@@ -102,8 +102,19 @@ namespace Parquet.Data
 
          for(int i = 0; i < row.Length; i++)
          {
-            if (row[i].GetType() != _schema.Elements[i].ElementType)
-               throw new ArgumentException($"column '{_schema.Elements[i].Name}' expects '{_schema.Elements[i].ElementType}' but {row[i].GetType()} passed");
+            object rowValue = row[i];
+            SchemaElement se = _schema.Elements[i];
+            Type elementType = se.ElementType;
+
+            if (rowValue == null)
+            {
+               se.IsNullable = true;
+            }
+            else
+            {
+               if (rowValue.GetType() != elementType)
+                  throw new ArgumentException($"column '{se.Name}' expects '{elementType}' but {rowValue.GetType()} passed");
+            }
          }
       }
 

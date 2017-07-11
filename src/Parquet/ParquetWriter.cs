@@ -43,19 +43,22 @@ namespace Parquet
       private readonly ThriftStream _thrift;
       private static readonly byte[] Magic = System.Text.Encoding.ASCII.GetBytes("PAR1");
       private readonly MetaBuilder _meta = new MetaBuilder();
-      private readonly ParquetOptions _options = new ParquetOptions();
+      private readonly ParquetOptions _options;
       private readonly IValuesWriter _plainWriter;
+      private bool _dataWritten;
 
       /// <summary>
       /// Creates an instance of parquet writer on top of a stream
       /// </summary>
       /// <param name="output">Writeable, seekable stream</param>
-      public ParquetWriter(Stream output)
+      /// <param name="options">Additional options</param>
+      public ParquetWriter(Stream output, ParquetOptions options = null)
       {
          _output = output ?? throw new ArgumentNullException(nameof(output));
          if (!output.CanWrite) throw new ArgumentException("stream is not writeable", nameof(output));
          _thrift = new ThriftStream(output);
          _writer = new BinaryWriter(_output);
+         _options = options ?? new ParquetOptions();
 
          _plainWriter = new PlainValuesWriter(_options);
 
@@ -74,35 +77,35 @@ namespace Parquet
 
          var stats = new DataSetStats(dataSet);
 
-
          long totalCount = dataSet.Count;
 
          Thrift.RowGroup rg = _meta.AddRowGroup();
          long rgStartPos = _output.Position;
-         rg.Columns = dataSet.Schema.Elements.Select(c => Write(c, dataSet.GetColumn(c.Name), compression)).ToList();
+         rg.Columns = dataSet.Schema.Elements
+            .Select(c => 
+               Write(c, dataSet.GetColumn(c.Name), compression, stats.GetColumnStats(c)))
+            .ToList();
 
          //row group's size is a sum of _uncompressed_ sizes of all columns in it
          rg.Total_byte_size = rg.Columns.Sum(c => c.Meta_data.Total_uncompressed_size);
          rg.Num_rows = dataSet.Count;
+
+         _dataWritten = true;
       }
 
-      private Thrift.ColumnChunk Write(SchemaElement schema, IList values, CompressionMethod compression)
+      public static void Write(DataSet dataSet, Stream destination, CompressionMethod compression = CompressionMethod.Gzip, ParquetOptions options = null)
       {
-         Thrift.CompressionCodec codec = DataFactory.GetThriftCompression(compression);
-
-         var chunk = new Thrift.ColumnChunk();
-         long startPos = _output.Position;
-         chunk.File_offset = startPos;
-         chunk.Meta_data = new Thrift.ColumnMetaData();
-         chunk.Meta_data.Num_values = values.Count;
-         chunk.Meta_data.Type = schema.Thrift.Type;
-         chunk.Meta_data.Codec = codec;
-         chunk.Meta_data.Data_page_offset = startPos;
-         chunk.Meta_data.Encodings = new List<Thrift.Encoding>
+         using (var writer = new ParquetWriter(destination, options))
          {
-            Thrift.Encoding.PLAIN
-         };
-         chunk.Meta_data.Path_in_schema = new List<string> { schema.Name };
+            writer.Write(dataSet, compression);
+         }
+      }
+
+      private Thrift.ColumnChunk Write(SchemaElement schema, IList values,
+         CompressionMethod compression,
+         ColumnStats stats)
+      {
+         Thrift.ColumnChunk chunk = _meta.AddColumnChunk(compression, _output, schema, values.Count);
 
          var ph = new Thrift.PageHeader(Thrift.PageType.DATA_PAGE, 0, 0);
          ph.Data_page_header = new Thrift.DataPageHeader
@@ -113,12 +116,12 @@ namespace Parquet
             Num_values = values.Count
          };
 
-         WriteValues(schema, values, ph, compression);
+         WriteValues(schema, values, ph, compression, stats);
 
          return chunk;
       }
 
-      private void WriteValues(SchemaElement schema, IList values, Thrift.PageHeader ph, CompressionMethod compression)
+      private void WriteValues(SchemaElement schema, IList values, Thrift.PageHeader ph, CompressionMethod compression, ColumnStats stats)
       {
          byte[] data;
 
@@ -126,7 +129,11 @@ namespace Parquet
          {
             using (var writer = new BinaryWriter(ms))
             {
-               //columnWriter.Write((int)0);   //definition levels, only for nullable columns
+               if(stats.NullCount > 0)
+               {
+                  throw new NotSupportedException("nullable columns not supported");
+               }
+
                _plainWriter.Write(writer, schema, values);
 
                data = ms.ToArray();
@@ -164,6 +171,8 @@ namespace Parquet
       /// </summary>
       public void Dispose()
       {
+         if (!_dataWritten) return;
+
          //finalize file
          long size = _thrift.Write(_meta.ThriftMeta);
 

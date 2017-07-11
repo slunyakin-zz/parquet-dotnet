@@ -9,29 +9,34 @@ namespace Parquet.Data
       private readonly DataSet _ds;
       private readonly Dictionary<SchemaElement, ColumnStats> _schemaToStats = new Dictionary<SchemaElement, ColumnStats>();
 
-      struct ColumnStats
-      {
-         bool HasNulls;
-      }
-
       public DataSetStats(DataSet ds)
       {
          _ds = ds;
       }
 
-      private ColumnStats GetColumnStats(SchemaElement schema)
+      public ColumnStats GetColumnStats(SchemaElement schema)
       {
          if (_schemaToStats.TryGetValue(schema, out ColumnStats result))
             return result;
 
-         CalculateStats(schema);
+         ColumnStats stats = CalculateStats(schema);
+         _schemaToStats[schema] = stats;
 
-         return _schemaToStats[schema];
+         return stats;
       }
 
-      private void CalculateStats(SchemaElement schema)
+      private ColumnStats CalculateStats(SchemaElement schema)
       {
          int index = _ds.Schema.GetElementIndex(schema);
+         var stats = new ColumnStats();
+
+         foreach(object value in _ds.GetColumn(index))
+         {
+            if (value == null) stats.NullCount += 1;
+         }
+
+         return stats;
       }
+
    }
 }
