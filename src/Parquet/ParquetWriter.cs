@@ -131,6 +131,10 @@ namespace Parquet
             {
                if(stats.NullCount > 0)
                {
+                  CreateDefinitions(values, schema, out IList newValues, out List<int> definitions);
+                  values = newValues;
+
+                  //todo: write definitions
                   throw new NotSupportedException("nullable columns not supported");
                }
 
@@ -159,6 +163,25 @@ namespace Parquet
 
          _thrift.Write(ph);
          _output.Write(data, 0, data.Length);
+      }
+
+      private static void CreateDefinitions(IList values, SchemaElement schema, out IList nonNullableValues, out List<int> definitions)
+      {
+         nonNullableValues = TypeFactory.Create(schema, false);
+         definitions = new List<int>();
+
+         foreach(var value in values)
+         {
+            if(value == null)
+            {
+               definitions.Add(0);
+            }
+            else
+            {
+               definitions.Add(1);
+               nonNullableValues.Add(value);
+            }
+         }
       }
 
       private void WriteMagic()

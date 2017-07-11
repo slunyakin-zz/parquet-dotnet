@@ -51,7 +51,6 @@ namespace Parquet.Data
          Name = thriftSchema.Name;
          Thrift = thriftSchema;
          ElementType = TypeFactory.ToSystemType(thriftSchema);
-         IsNullable = thriftSchema.Repetition_type != Parquet.Thrift.FieldRepetitionType.REQUIRED;
       }
 
       /// <summary>
@@ -67,7 +66,11 @@ namespace Parquet.Data
       /// <summary>
       /// Returns true if element can have null values
       /// </summary>
-      public bool? IsNullable { get; internal set; }
+      public bool IsNullable
+      {
+         get { return Thrift.Repetition_type != Parquet.Thrift.FieldRepetitionType.REQUIRED; }
+         set { Thrift.Repetition_type = value ? Parquet.Thrift.FieldRepetitionType.OPTIONAL : Parquet.Thrift.FieldRepetitionType.REPEATED; }
+      }
 
       internal PSE Thrift { get; set; }
 
