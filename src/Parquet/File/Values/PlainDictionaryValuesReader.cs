@@ -13,6 +13,8 @@ namespace Parquet.File.Values
          int bitWidth = reader.ReadByte();
          int length = GetRemainingLength(reader);
 
+         //new PlainValuesReader(new ParquetOptions()).Read(reader, schema, destination, maxValues);
+
          RunLengthBitPackingHybridValuesReader.ReadRleBitpackedHybrid(reader, bitWidth, length, (List<int>)destination, maxValues);
       }
 
