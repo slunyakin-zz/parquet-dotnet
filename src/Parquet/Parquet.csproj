@@ -22,13 +22,9 @@
   
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.6|AnyCPU'">
     <DocumentationFile>bin\Debug\netstandard1.6\Parquet.xml</DocumentationFile>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <TreatSpecificWarningsAsErrors></TreatSpecificWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.6|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard1.6\Parquet.xml</DocumentationFile>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <TreatSpecificWarningsAsErrors></TreatSpecificWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.4|AnyCPU'">
     <DocumentationFile>bin\Debug\netstandard1.4\Parquet.xml</DocumentationFile>
