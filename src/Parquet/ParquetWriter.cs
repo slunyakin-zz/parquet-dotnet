@@ -45,6 +45,7 @@ namespace Parquet
       private readonly MetaBuilder _meta = new MetaBuilder();
       private readonly ParquetOptions _options;
       private readonly IValuesWriter _plainWriter;
+      private readonly IValuesWriter _rleWriter;
       private bool _dataWritten;
 
       /// <summary>
@@ -61,6 +62,7 @@ namespace Parquet
          _options = options ?? new ParquetOptions();
 
          _plainWriter = new PlainValuesWriter(_options);
+         _rleWriter = new RunLengthBitPackingHybridValuesWriter();
 
          //file starts with magic
          WriteMagic();
@@ -134,8 +136,7 @@ namespace Parquet
                   CreateDefinitions(values, schema, out IList newValues, out List<int> definitions);
                   values = newValues;
 
-                  //todo: write definitions
-                  throw new NotSupportedException("nullable columns not supported");
+                  _rleWriter.Write(writer, schema, definitions);
                }
 
                _plainWriter.Write(writer, schema, values);

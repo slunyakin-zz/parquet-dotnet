@@ -92,6 +92,14 @@ namespace Parquet.Test
 
          ms.Position = 0;
          DataSet ds1 = ParquetReader.Read(ms);
+
+         Assert.Equal(ds1[0].GetInt(0), 1);
+         Assert.Equal(ds1[1].GetInt(0), 2);
+         Assert.Equal(ds1[2].GetInt(0), 3);
+         Assert.True(ds1[3].IsNullAt(0));
+         Assert.Equal(ds1[4].GetInt(0), 4);
+         Assert.True(ds1[5].IsNullAt(0));
+         Assert.Equal(ds1[6].GetInt(0), 5);
       }
    }
 }
